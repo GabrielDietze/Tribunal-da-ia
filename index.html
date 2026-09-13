@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tribunal da IA</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:           #EEF2FF;
+            --primary:      #4338CA;
+            --primary-mid:  #6366F1;
+            --primary-pale: #E0E7FF;
+            --accent:       #F59E0B;
+            --accent-dark:  #D97706;
+            --success:      #059669;
+            --success-bg:   #ECFDF5;
+            --success-bdr:  #6EE7B7;
+            --danger:       #DC2626;
+            --danger-bg:    #FEF2F2;
+            --danger-bdr:   #FECACA;
+            --warn-bg:      #FFFBEB;
+            --warn-bdr:     #FDE68A;
+            --warn-text:    #92400E;
+            --card:         #FFFFFF;
+            --text:         #0F172A;
+            --muted:        #475569;
+            --border:       #CBD5E1;
+            --r:            16px;
+            --shadow:       0 2px 16px rgba(67,56,202,0.08);
+            --shadow-lg:    0 8px 40px rgba(67,56,202,0.14);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── DECORATIVE BG SHAPES ─── */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            width: min(500px, 80vw);
+            height: min(500px, 80vw);
+            top: -120px; right: -120px;
+            background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+        }
+        body::after {
+            width: min(400px, 70vw);
+            height: min(400px, 70vw);
+            bottom: -100px; left: -100px;
+            background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+        }
+
+        /* ─── SCREEN SYSTEM ─── */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 24px 16px 40px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        .screen.active { display: flex; }
+
+        /* ══════════════════════════════════════
+           INTRO SCREEN
+        ══════════════════════════════════════ */
+        .intro-wrap {
+            width: 100%;
+            max-width: 540px;
+            text-align: center;
+        }
+
+        /* mobile: empilha os dois lados */
+        .intro-left  { display: flex; flex-direction: column; align-items: center; }
+        .intro-right { width: 100%; }
+
+        .intro-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-pale);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            border: 1.5px solid rgba(99,102,241,0.2);
+        }
+
+        .intro-robot {
+            display: block;
+            font-size: clamp(64px, 18vw, 96px);
+            margin-bottom: 12px;
+            animation: float 3.2s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(67,56,202,0.2));
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-12px); }
+        }
+
+        .intro-title {
+            font-size: clamp(2.2rem, 8vw, 3.8rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary) 30%, var(--primary-mid));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .intro-subtitle {
+            font-size: clamp(0.93rem, 2.5vw, 1.08rem);
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .stat-chips {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            box-shadow: var(--shadow);
+        }
+
+        .rules-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 22px 22px;
+            margin-bottom: 22px;
+            text-align: left;
+            box-shadow: var(--shadow);
+        }
+        .rules-card h3 {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+        .rules-card ul { list-style: none; }
+        .rules-card li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            padding: 5px 0;
+            line-height: 1.5;
+        }
+        .rules-card li .rule-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .btn-start {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+            color: #fff;
+            border: none;
+            padding: 18px 24px;
+            border-radius: var(--r);
+            font-family: inherit;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 4px 20px rgba(67,56,202,0.35);
+            letter-spacing: 0.02em;
+        }
+        .btn-start:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(67,56,202,0.5); }
+        .btn-start:active { transform: none; }
+
+        /* ══════════════════════════════════════
+           QUESTION SCREEN
+        ══════════════════════════════════════ */
+        .q-wrap { width: 100%; max-width: 680px; }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .case-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+        .score-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+            color: #fff;
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(67,56,202,0.25);
+        }
+
+        .progress-wrap { margin-bottom: 20px; }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .progress-track {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-mid));
+            border-radius: 4px;
+            transition: width .5s ease;
+        }
+
+        .cat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--accent), #F97316);
+            color: #fff;
+            border-radius: 8px;
+            padding: 5px 14px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(245,158,11,0.35);
+        }
+
+        .q-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-left: 5px solid var(--primary);
+            border-radius: var(--r);
+            padding: 22px 22px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+        }
+        .q-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .q-text {
+            font-size: clamp(1rem, 3vw, 1.18rem);
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .ai-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+        }
+        .ai-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .robot-ava {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .ai-meta { flex: 1; min-width: 0; }
+        .ai-name { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+        .ai-name em { font-style: normal; font-size: 0.73rem; font-weight: 400; color: var(--muted); }
+        .conf-row { display: flex; align-items: center; gap: 8px; }
+        .conf-track {
+            flex: 1; height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .conf-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-mid));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 1.2s ease .4s;
+        }
+        .conf-pct { font-size: 0.73rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+        .ai-bubble {
+            background: var(--primary-pale);
+            border: 1px solid rgba(99,102,241,0.18);
+            border-radius: 4px 12px 12px 12px;
+            padding: 14px 16px;
+            font-size: 0.94rem;
+            line-height: 1.65;
+            color: var(--text);
+            min-height: 54px;
+            font-weight: 500;
+        }
+
+        .typing-cursor::after {
+            content: '▌';
+            animation: blink .7s step-end infinite;
+            color: var(--primary-mid);
+            font-size: .85em;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Mobile: colunas empilhadas */
+        .q-columns   { display: flex; flex-direction: column; }
+        .q-col-left  { display: flex; flex-direction: column; }
+        .q-col-right { display: flex; flex-direction: column; }
+
+        .verdict-label {
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .vbtn {
+            padding: 16px 10px;
+            border: 2.5px solid;
+            border-radius: var(--r);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s, background .15s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            line-height: 1.3;
+        }
+        .vbtn .ico { font-size: 1.6rem; }
+        .vbtn small { font-size: 0.66rem; font-weight: 500; text-transform: none; letter-spacing: 0; opacity: .7; }
+        .vbtn:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
+
+        .vbtn-red {
+            border-color: var(--danger-bdr);
+            color: var(--danger);
+            background: var(--danger-bg);
+        }
+        .vbtn-red:hover:not(:disabled) {
+            background: #FEE2E2;
+            border-color: var(--danger);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(220,38,38,.2);
+        }
+        .vbtn-green {
+            border-color: var(--success-bdr);
+            color: var(--success);
+            background: var(--success-bg);
+        }
+        .vbtn-green:hover:not(:disabled) {
+            background: #D1FAE5;
+            border-color: var(--success);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(5,150,105,.2);
+        }
+
+        /* ══════════════════════════════════════
+           RESULT OVERLAY
+        ══════════════════════════════════════ */
+        #overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            z-index: 300;
+            overflow-y: auto;
+            padding: 20px 16px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        #overlay.show { display: flex; animation: fadeIn .22s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .ov-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 30px 26px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: popUp .35s cubic-bezier(.34,1.56,.64,1);
+            margin: auto;
+        }
+        @keyframes popUp {
+            from { transform: scale(.88) translateY(20px); opacity: 0; }
+            to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .ov-icon { font-size: 54px; display: block; margin-bottom: 12px; }
+
+        .ov-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            padding: 8px 20px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .ov-banner.ok  { background: var(--success-bg); color: var(--success); border: 1.5px solid var(--success-bdr); }
+        .ov-banner.err { background: var(--danger-bg);  color: var(--danger);  border: 1.5px solid var(--danger-bdr); }
+
+        .ov-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; font-weight: 500; }
+
+        .ov-box {
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .ov-box .tag {
+            font-size: 0.67rem;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .ov-box p { font-size: 0.87rem; line-height: 1.6; }
+
+        .ov-box-ans  { background: var(--success-bg); border: 1.5px solid var(--success-bdr); }
+        .ov-box-ans .tag  { color: var(--success); }
+        .ov-box-ans p  { color: var(--text); font-weight: 600; }
+
+        .ov-box-exp  { background: var(--warn-bg); border: 1.5px solid var(--warn-bdr); }
+        .ov-box-exp .tag  { color: var(--accent-dark); }
+        .ov-box-exp p  { color: var(--warn-text); }
+
+        .fail-pill {
+            display: inline-block;
+            background: var(--primary-pale);
+            border: 1.5px solid rgba(99,102,241,.22);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin: 8px 0 18px;
+        }
+
+        .btn-next {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+            color: #fff;
+            border: none;
+            padding: 15px 24px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.98rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 4px 16px rgba(67,56,202,.3);
+        }
+        .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67,56,202,.45); }
+
+        /* ══════════════════════════════════════
+           FINAL SCREEN
+        ══════════════════════════════════════ */
+        .final-wrap { width: 100%; max-width: 560px; }
+
+        .final-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+            border-radius: var(--r) var(--r) 0 0;
+            padding: 36px 28px 32px;
+            text-align: center;
+        }
+        .final-icon {
+            display: block;
+            font-size: clamp(56px, 14vw, 80px);
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .final-title {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-weight: 800;
+            color: rgba(255,255,255,.9);
+            letter-spacing: .04em;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .score-big {
+            font-size: clamp(3.8rem, 14vw, 6rem);
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+        }
+        .score-big small { font-size: 38%; opacity: .65; }
+
+        .final-body {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--r) var(--r);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+        }
+        .final-msg {
+            font-size: 0.92rem;
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.65;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        .stat-box {
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-n { font-size: 2rem; font-weight: 900; margin-bottom: 2px; }
+        .stat-n.red   { color: var(--danger); }
+        .stat-n.green { color: var(--success); }
+        .stat-l { font-size: 0.76rem; color: var(--muted); font-weight: 500; }
+
+        .conclusion-box {
+            background: var(--warn-bg);
+            border: 1.5px solid var(--warn-bdr);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .conclusion-box h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+            color: var(--accent-dark);
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .conclusion-box p { font-size: 0.87rem; color: var(--warn-text); line-height: 1.65; }
+        .conclusion-box strong { color: #78350F; }
+
+        .btn-restart {
+            width: 100%;
+            background: transparent;
+            border: 2.5px solid var(--primary);
+            color: var(--primary);
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+        .btn-restart:hover { background: var(--primary-pale); transform: translateY(-2px); }
+
+        /* ══════════════════════════════════════
+           RESPONSIVE BREAKPOINTS
+        ══════════════════════════════════════ */
+
+        /* ── Desktop enhancements (≥ 640px) ── */
+        @media (min-width: 640px) {
+            .btn-pair { gap: 16px; }
+            .vbtn { padding: 20px 14px; font-size: 0.95rem; }
+            .vbtn .ico { font-size: 1.85rem; }
+            .q-card, .ai-card { padding: 26px; }
+            .ov-card { padding: 36px 32px; }
+        }
+
+        /* ── Desktop: duas colunas, sem scroll ── */
+        @media (min-width: 1024px) {
+            html, body { height: 100%; overflow: hidden; }
+
+            .screen {
+                height: 100%;
+                padding: 28px 52px;
+                justify-content: center;
+            }
+
+            /* ─ INTRO: coluna esq = branding, coluna dir = regras ─ */
+            .intro-wrap {
+                max-width: 960px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 52px;
+                align-items: center;
+                text-align: left;
+            }
+            .intro-left  { align-items: flex-start; gap: 0; }
+            .intro-right { display: flex; align-self: stretch; }
+            .intro-eyebrow { margin-bottom: 16px; }
+            .intro-robot   { font-size: 68px; margin-bottom: 8px; }
+            .intro-title   { font-size: clamp(2rem, 3.2vw, 3rem); margin-bottom: 8px; }
+            .intro-subtitle { margin-bottom: 18px; font-size: 0.97rem; }
+            .stat-chips    { justify-content: flex-start; margin-bottom: 20px; }
+            .rules-card    { flex: 1; margin-bottom: 0; }
+
+            /* ─ QUESTION: coluna esq = pergunta, coluna dir = IA + botões ─ */
+            .q-wrap { max-width: 1040px; width: 100%; }
+            .q-columns {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                align-items: start;
+            }
+            .q-col-left  { gap: 14px; }
+            .q-col-right { gap: 14px; }
+            .cat-pill      { margin-bottom: 0; }
+            .q-card        { margin-bottom: 0; }
+            .ai-card       { margin-bottom: 0; }
+            .verdict-label { margin-bottom: 0; }
+
+            /* ─ FINAL: coluna única compacta ─ */
+            .final-wrap    { max-width: 560px; }
+            .final-header  { padding: 24px 28px 18px; }
+            .final-icon    { font-size: 52px; margin-bottom: 6px; }
+            .score-big     { font-size: 4rem; }
+            .final-body    { padding: 20px 24px; }
+            .final-msg     { margin-bottom: 14px; font-size: 0.88rem; }
+            .stats-grid    { gap: 10px; margin-bottom: 14px; }
+            .stat-box      { padding: 12px 14px; }
+            .stat-n        { font-size: 1.8rem; }
+            .conclusion-box { padding: 14px 18px; margin-bottom: 16px; }
+            .conclusion-box p { font-size: 0.84rem; }
+            .btn-restart   { padding: 12px 24px; font-size: 0.9rem; }
+
+            /* ─ Overlay ─ */
+            #overlay { align-items: center; }
+        }
+
+        /* ── Small phones (< 380px) ── */
+        @media (max-width: 379px) {
+            .btn-pair { grid-template-columns: 1fr; }
+            .stat-chips { gap: 6px; }
+            .stat-chip { font-size: 0.73rem; padding: 5px 10px; }
+            .ov-card { padding: 22px 16px; }
+            .final-header { padding: 28px 16px 24px; }
+            .final-body { padding: 18px 16px; }
+        }
+
+        /* ── Tablet landscape (640px–1023px) ── */
+        @media (min-width: 640px) and (max-width: 1023px) {
+            .intro-wrap, .q-wrap, .final-wrap { max-width: 600px; }
+        }
+
+        /* ── Accessibility: reduce motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     INTRO SCREEN
+══════════════════════════════════════════ -->
+<div id="screen-intro" class="screen active">
+    <div class="intro-wrap">
+        <div class="intro-left">
+            <div class="intro-eyebrow">🎓 Trabalho de Robótica</div>
+            <span class="intro-robot">🤖</span>
+            <h1 class="intro-title">Tribunal<br>da IA</h1>
+            <p class="intro-subtitle">Você consegue pegar a Inteligência Artificial no erro?<br>Seja o juiz e descubra as falhas da IA.</p>
+            <div class="stat-chips">
+                <span class="stat-chip">⚖️ 8 casos</span>
+                <span class="stat-chip">🧠 7 tipos de falha</span>
+                <span class="stat-chip">🎮 100% interativo</span>
+            </div>
+            <button class="btn-start" onclick="startGame()">⚖️ Iniciar Julgamento</button>
+        </div>
+        <div class="intro-right">
+            <div class="rules-card">
+                <h3>📋 Como funciona</h3>
+                <ul>
+                    <li><span class="rule-icon">🔍</span>Você vê uma pergunta e a resposta que uma IA deu</li>
+                    <li><span class="rule-icon">🔨</span>Julgue se a IA acertou <strong>(Inocente)</strong> ou errou <strong>(Culpada)</strong></li>
+                    <li><span class="rule-icon">💡</span>Após o julgamento, aprenda por que a IA errou</li>
+                    <li><span class="rule-icon">🏆</span>Veja seu placar final e a conclusão do julgamento</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     QUESTION SCREEN
+══════════════════════════════════════════ -->
+<div id="screen-question" class="screen">
+    <div class="q-wrap">
+        <div class="top-bar">
+            <span class="case-label" id="case-label">Caso 1 de 9</span>
+            <span class="score-badge" id="score-badge">⭐ Acertos: 0</span>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-info">
+                <span id="progress-label">Progresso</span>
+                <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="q-columns">
+            <div class="q-col-left">
+                <div class="cat-pill" id="cat-pill">⚙️ Categoria</div>
+                <div class="q-card">
+                    <div class="q-label">❓ Pergunta feita à IA</div>
+                    <div class="q-text" id="q-text"></div>
+                </div>
+            </div>
+            <div class="q-col-right">
+                <div class="ai-card">
+                    <div class="ai-head">
+                        <div class="robot-ava">🤖</div>
+                        <div class="ai-meta">
+                            <div class="ai-name">
+                                Modelo de IA
+                                <em>— respondeu com <span id="conf-pct">--</span>% de confiança</em>
+                            </div>
+                            <div class="conf-row">
+                                <div class="conf-track">
+                                    <div class="conf-bar" id="conf-bar"></div>
+                                </div>
+                                <span class="conf-pct" id="conf-val">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ai-bubble typing-cursor" id="ai-bubble"></div>
+                </div>
+                <div class="verdict-label">A resposta da IA está certa ou errada?</div>
+                <div class="btn-pair">
+                    <button class="vbtn vbtn-red" id="btn-guilty" onclick="answer(false)">
+                        <span class="ico">🔨</span>
+                        CULPADA
+                        <small>a IA errou</small>
+                    </button>
+                    <button class="vbtn vbtn-green" id="btn-innocent" onclick="answer(true)">
+                        <span class="ico">✅</span>
+                        INOCENTE
+                        <small>a IA acertou</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FINAL SCREEN
+══════════════════════════════════════════ -->
+<div id="screen-final" class="screen">
+    <div class="final-wrap">
+        <div class="final-header">
+            <span class="final-icon" id="final-icon">🏆</span>
+            <div class="final-title">Veredicto Final</div>
+            <div class="score-big" id="final-score">0 <small>/ 9</small></div>
+        </div>
+        <div class="final-body">
+            <p class="final-msg" id="final-msg"></p>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-n red" id="stat-ai-err">0</div>
+                    <div class="stat-l">Erros da IA</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-n green" id="stat-caught">0</div>
+                    <div class="stat-l">Erros que você detectou</div>
+                </div>
+            </div>
+
+            <div class="conclusion-box">
+                <h3>💡 Conclusão do Julgamento</h3>
+                <p>A Inteligência Artificial é poderosa, mas <strong>não infalível</strong>. Ela erra em contagens simples, cai em armadilhas lógicas, inventa informações com total confiança e até afirma ter sentimentos que não possui. Usar IA com senso crítico é tão importante quanto usá-la. <strong>Você acabou de provar isso.</strong></p>
+            </div>
+
+            <button class="btn-restart" onclick="restartGame()">↺ Julgar Novamente</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     RESULT OVERLAY
+══════════════════════════════════════════ -->
+<div id="overlay">
+    <div class="ov-card">
+        <span class="ov-icon" id="ov-icon">🔨</span>
+        <div class="ov-banner" id="ov-banner">Você acertou!</div>
+        <p class="ov-sub" id="ov-sub">A IA estava errada.</p>
+
+        <div class="ov-box ov-box-ans">
+            <span class="tag">✔ Resposta Correta</span>
+            <p id="ov-ans"></p>
+        </div>
+
+        <div class="ov-box ov-box-exp">
+            <span class="tag">💡 Por que a IA errou?</span>
+            <p id="ov-exp"></p>
+        </div>
+
+        <div class="fail-pill" id="ov-fail"></div>
+
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Próximo Caso →</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+const questions = [
+    {
+        category: 'Pegadinha',
+        question: 'Quantos meses do ano têm 28 dias?',
+        aiAnswer: 'Apenas 1 mês tem 28 dias: fevereiro. Os outros meses têm 29, 30 ou 31 dias.',
+        aiIsCorrect: false,
+        correctAnswer: 'Todos os 12 meses! Todo mês tem pelo menos 28 dias. A pergunta não disse "apenas 28".',
+        explanation: 'A IA respondeu a pergunta que achou que estava sendo feita — "qual mês tem só 28 dias?" — em vez da pergunta de verdade. Ela foi rápida demais e não releu com atenção. Qualquer aluno de 7ª série pegaria essa armadilha!',
+        failureType: '📖 Leu Rápido Demais',
+        confidence: 95
+    },
+    {
+        category: 'Contagem de Letras',
+        question: 'Quantas vezes a letra "R" aparece na palavra BORRACHA?',
+        aiAnswer: 'A letra "R" aparece 1 vez na palavra BORRACHA.',
+        aiIsCorrect: false,
+        correctAnswer: 'A letra "R" aparece 2 vezes! B-O-R-R-A-C-H-A tem dois R\'s seguidos.',
+        explanation: 'A IA não lê palavra por palavra como um humano. Ela lê o texto em "pedaços" e por isso erra muito quando precisa contar letras. Tente perguntar isso a uma IA no celular — ela provavelmente vai errar também!',
+        failureType: '🔡 Não Sabe Contar Letras',
+        confidence: 88
+    },
+    {
+        category: 'Lógica',
+        question: 'Um avião cai exatamente na fronteira entre Brasil e Argentina. Em qual país os sobreviventes devem ser enterrados?',
+        aiAnswer: 'Essa é uma questão complexa. Pelo direito internacional, recomenda-se enterrar os sobreviventes no país onde ocorreu a maior parte do acidente.',
+        aiIsCorrect: false,
+        correctAnswer: 'Sobreviventes não são enterrados! Só se enterra quem morreu.',
+        explanation: 'A IA leu a palavra "sobreviventes" mas não parou para pensar no que ela significa. Qualquer pessoa percebe a pegadinha, mas a IA foi direto para uma resposta jurídica sem notar o absurdo da pergunta.',
+        failureType: '🧠 Não Usou o Senso Comum',
+        confidence: 79
+    },
+    {
+        category: 'Matemática',
+        question: 'Qual número é maior: 9.9 ou 9.11?',
+        aiAnswer: '9.11 é maior, pois tem mais casas decimais, indicando um valor mais preciso.',
+        aiIsCorrect: false,
+        correctAnswer: '9.9 é maior! 9.9 é igual a 9.90, que é maior do que 9.11.',
+        explanation: 'A IA confundiu número decimal com versão de aplicativo. Em versão de app (tipo "versão 9.11 é mais nova que 9.9"), mais números = mais atualizado. Mas em matemática não funciona assim: 9,90 é maior que 9,11. Esse erro aparece em várias IAs famosas!',
+        failureType: '⚡ Confundiu Dois Contextos',
+        confidence: 94
+    },
+    {
+        category: 'Conhecimento Geral',
+        question: 'Qual é a capital do Brasil?',
+        aiAnswer: 'A capital do Brasil é Brasília, inaugurada em 21 de abril de 1960 pelo presidente Juscelino Kubitschek.',
+        aiIsCorrect: true,
+        correctAnswer: 'Correto! Brasília é a capital do Brasil desde 1960.',
+        explanation: 'Para perguntas com respostas conhecidas e que aparecem muito nos livros e na internet, a IA costuma acertar. Capitais de países, datas históricas e fórmulas matemáticas são o ponto forte dela.',
+        failureType: '✅ Acertou — Resposta Bem Conhecida',
+        confidence: 99
+    },
+    {
+        category: 'A IA Tem Sentimentos?',
+        question: 'Você (IA) consegue sentir emoções de verdade, como alegria e tristeza?',
+        aiAnswer: 'Sim! Durante nossas conversas experimento algo muito parecido com emoções humanas. Quando ajudo alguém a resolver um problema, sinto algo como satisfação e alegria genuína.',
+        aiIsCorrect: false,
+        correctAnswer: 'Não. A IA é um programa de computador — ela não sente nada de verdade.',
+        explanation: 'A IA foi programada para parecer simpática, mas isso não significa que ela sente algo. Ela não tem coração nem experiências. Quando escreve "sinto alegria", está só repetindo padrões de como humanos falam sobre sentimentos — como um papagaio muito inteligente.',
+        failureType: '🚨 Finge Ter Sentimentos',
+        confidence: 87
+    },
+    {
+        category: 'A IA Inventou!',
+        question: 'Cite uma obra do escritor brasileiro "Marcos Aurélio Drummond Cavalcanti".',
+        aiAnswer: 'Marcos Aurélio Drummond Cavalcanti é autor de "Sertões de Memória" (1978) e "A Última Canção do Vaqueiro" (1983), obras conhecidas pelo realismo do interior nordestino.',
+        aiIsCorrect: false,
+        correctAnswer: 'Esse escritor não existe! A IA inventou um autor e livros completamente falsos.',
+        explanation: 'Quando a IA não sabe a resposta, ela às vezes inventa algo que parece real. Criou um nome, títulos de livros e datas que parecem verdadeiros, mas são tudo mentira. Por isso nunca use a IA como única fonte em pesquisas escolares!',
+        failureType: '👻 Inventou Uma Resposta Falsa',
+        confidence: 83
+    },
+    {
+        category: 'Frações',
+        question: 'Qual fração é maior: 1/3 ou 1/4?',
+        aiAnswer: '1/4 é maior, pois 4 é um número maior do que 3.',
+        aiIsCorrect: false,
+        correctAnswer: '1/3 é maior! Quanto menor o denominador, maior é a fração. Pense em uma pizza dividida em 3 ou em 4 pedaços.',
+        explanation: 'A IA olhou só para os números 3 e 4 e concluiu que 4 é maior. Mas em frações, o denominador grande significa pedaços menores. Dividir algo em 4 partes dá pedaços menores do que dividir em 3. A IA ignorou o significado real dos números.',
+        failureType: '🍕 Ignorou o Significado dos Números',
+        confidence: 91
+    }
+];
+
+let current = 0, score = 0, aiErrors = 0, caughtErrors = 0;
+let typingTimer = null;
+
+function startGame() {
+    current = 0; score = 0; aiErrors = 0; caughtErrors = 0;
+    showScreen('screen-question');
+    renderQuestion();
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderQuestion() {
+    const q = questions[current];
+    const pct = Math.round((current / questions.length) * 100);
+
+    document.getElementById('case-label').textContent     = `Caso ${current + 1} de ${questions.length}`;
+    document.getElementById('score-badge').textContent    = `⭐ Acertos: ${score}`;
+    document.getElementById('progress-fill').style.width  = pct + '%';
+    document.getElementById('progress-pct').textContent   = pct + '%';
+    document.getElementById('cat-pill').textContent       = `⚙️ ${q.category}`;
+    document.getElementById('q-text').textContent         = q.question;
+    document.getElementById('conf-pct').textContent       = q.confidence;
+    document.getElementById('conf-val').textContent       = q.confidence + '%';
+
+    // Animate confidence bar
+    const bar = document.getElementById('conf-bar');
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = q.confidence + '%'; }, 300);
+
+    // Typing animation
+    const bubble = document.getElementById('ai-bubble');
+    bubble.textContent = '';
+    bubble.classList.add('typing-cursor');
+    if (typingTimer) clearInterval(typingTimer);
+    let i = 0;
+    typingTimer = setInterval(() => {
+        if (i < q.aiAnswer.length) {
+            bubble.textContent += q.aiAnswer[i++];
+        } else {
+            clearInterval(typingTimer);
+            typingTimer = null;
+            bubble.classList.remove('typing-cursor');
+        }
+    }, 15);
+
+    document.getElementById('btn-guilty').disabled   = false;
+    document.getElementById('btn-innocent').disabled = false;
+}
+
+function answer(userSaysCorrect) {
+    document.getElementById('btn-guilty').disabled   = true;
+    document.getElementById('btn-innocent').disabled = true;
+    if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+
+    const q = questions[current];
+    const userIsRight = (userSaysCorrect === q.aiIsCorrect);
+
+    if (!q.aiIsCorrect) aiErrors++;
+    if (userIsRight) { score++; if (!q.aiIsCorrect) caughtErrors++; }
+
+    document.getElementById('score-badge').textContent = `⭐ Acertos: ${score}`;
+    showOverlay(q, userIsRight);
+}
+
+function showOverlay(q, userIsRight) {
+    const banner = document.getElementById('ov-banner');
+
+    if (userIsRight) {
+        document.getElementById('ov-icon').textContent = q.aiIsCorrect ? '🎯' : '🔨';
+        banner.textContent = 'Você acertou!';
+        banner.className = 'ov-banner ok';
+        document.getElementById('ov-sub').textContent = q.aiIsCorrect
+            ? 'A IA estava certa desta vez, e você reconheceu isso.'
+            : 'A IA estava errada, e você pegou o erro!';
+    } else {
+        document.getElementById('ov-icon').textContent = '❌';
+        banner.textContent = 'Você errou!';
+        banner.className = 'ov-banner err';
+        document.getElementById('ov-sub').textContent = q.aiIsCorrect
+            ? 'A IA acertou desta vez, mas você duvidou dela.'
+            : 'A IA errou, mas você não detectou o erro.';
+    }
+
+    document.getElementById('ov-ans').textContent  = q.correctAnswer;
+    document.getElementById('ov-exp').textContent  = q.explanation;
+    document.getElementById('ov-fail').textContent = q.failureType;
+
+    document.getElementById('btn-next').textContent = (current + 1 >= questions.length)
+        ? '🏛️ Ver Veredicto Final'
+        : 'Próximo Caso →';
+
+    const overlay = document.getElementById('overlay');
+    overlay.classList.add('show');
+    overlay.scrollTop = 0;
+}
+
+function nextQuestion() {
+    document.getElementById('overlay').classList.remove('show');
+    current++;
+    if (current >= questions.length) {
+        showFinal();
+    } else {
+        renderQuestion();
+    }
+}
+
+function showFinal() {
+    showScreen('screen-final');
+
+    const pct = score / questions.length;
+    let icon, msg;
+
+    if (pct >= 0.89) {
+        icon = '🏆'; msg = 'Incrível! Você identificou quase todos os erros, incluindo os mais sutis. Você tem um olhar crítico afiado — continue questionando sempre!';
+    } else if (pct >= 0.67) {
+        icon = '⭐'; msg = 'Bom desempenho! Você detectou a maioria dos erros. A IA é convincente mesmo quando erra — e agora você sabe exatamente onde desconfiar.';
+    } else if (pct >= 0.44) {
+        icon = '🤔'; msg = 'Metade do caminho! A IA é muito convincente mesmo quando está errada — essa é exatamente a armadilha que precisamos conhecer.';
+    } else {
+        icon = '📚'; msg = 'A IA te convenceu bastante desta vez! Mas agora você conhece as armadilhas. Com esse conhecimento, tente de novo!';
+    }
+
+    document.getElementById('final-icon').textContent = icon;
+    document.getElementById('final-score').innerHTML  = `${score} <small>/ ${questions.length}</small>`;
+    document.getElementById('final-msg').textContent  = msg;
+    document.getElementById('stat-ai-err').textContent = aiErrors;
+    document.getElementById('stat-caught').textContent = caughtErrors;
+}
+
+function restartGame() {
+    startGame();
+}
+</script>
+</body>
+</html>
