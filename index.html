@@ -70,7 +70,7 @@
         /* ─── SCREEN SYSTEM ─── */
         .screen {
             display: none;
-            min-height: 100vh;
+            min-height: 100dvh;
             padding: 24px 16px 40px;
             align-items: center;
             justify-content: center;
@@ -524,30 +524,45 @@
         /* ══════════════════════════════════════
            FINAL SCREEN
         ══════════════════════════════════════ */
-        .final-wrap { width: 100%; max-width: 560px; }
+
+        /* Garante espaçamento topo/fundo mesmo quando conteúdo é alto.
+           ::before e ::after com flex:1 + min-height:0 colapsam quando
+           há overflow, preservando o padding lateral e vertical. */
+        #screen-final {
+            justify-content: flex-start;
+            padding: 16px;
+        }
+        #screen-final::before,
+        #screen-final::after {
+            content: '';
+            flex: 1;
+            min-height: 0;
+        }
+
+        .final-wrap { width: 100%; max-width: 420px; }
 
         .final-header {
             background: linear-gradient(135deg, var(--primary), var(--primary-mid));
             border-radius: var(--r) var(--r) 0 0;
-            padding: 36px 28px 32px;
+            padding: 14px 18px 10px;
             text-align: center;
         }
         .final-icon {
             display: block;
-            font-size: clamp(56px, 14vw, 80px);
-            margin-bottom: 10px;
+            font-size: clamp(28px, 6vw, 38px);
+            margin-bottom: 4px;
             animation: float 3s ease-in-out infinite;
         }
         .final-title {
-            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-size: clamp(0.78rem, 2.5vw, 0.95rem);
             font-weight: 800;
             color: rgba(255,255,255,.9);
             letter-spacing: .04em;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             text-transform: uppercase;
         }
         .score-big {
-            font-size: clamp(3.8rem, 14vw, 6rem);
+            font-size: clamp(2rem, 8vw, 3.2rem);
             font-weight: 900;
             color: #fff;
             line-height: 1;
@@ -559,59 +574,59 @@
             border: 1.5px solid var(--border);
             border-top: none;
             border-radius: 0 0 var(--r) var(--r);
-            padding: 24px;
+            padding: 12px 14px;
             box-shadow: var(--shadow-lg);
         }
         .final-msg {
-            font-size: 0.92rem;
+            font-size: 0.8rem;
             color: var(--muted);
             font-weight: 500;
-            line-height: 1.65;
-            margin-bottom: 20px;
+            line-height: 1.5;
+            margin-bottom: 8px;
             text-align: center;
         }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
         .stat-box {
             background: var(--bg);
             border: 1.5px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 7px 10px;
             text-align: center;
         }
-        .stat-n { font-size: 2rem; font-weight: 900; margin-bottom: 2px; }
+        .stat-n { font-size: 1.4rem; font-weight: 900; margin-bottom: 1px; }
         .stat-n.red   { color: var(--danger); }
         .stat-n.green { color: var(--success); }
-        .stat-l { font-size: 0.76rem; color: var(--muted); font-weight: 500; }
+        .stat-l { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
 
         .conclusion-box {
             background: var(--warn-bg);
             border: 1.5px solid var(--warn-bdr);
-            border-radius: 12px;
-            padding: 18px 20px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 9px 12px;
+            margin-bottom: 8px;
             text-align: left;
         }
         .conclusion-box h3 {
-            font-size: 0.7rem;
+            font-size: 0.64rem;
             text-transform: uppercase;
             letter-spacing: .13em;
             color: var(--accent-dark);
             font-weight: 800;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
-        .conclusion-box p { font-size: 0.87rem; color: var(--warn-text); line-height: 1.65; }
+        .conclusion-box p { font-size: 0.78rem; color: var(--warn-text); line-height: 1.5; }
         .conclusion-box strong { color: #78350F; }
 
         .btn-restart {
             width: 100%;
             background: transparent;
-            border: 2.5px solid var(--primary);
+            border: 2px solid var(--primary);
             color: var(--primary);
-            padding: 14px 24px;
-            border-radius: 12px;
+            padding: 9px 16px;
+            border-radius: 10px;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
             transition: background .2s, transform .2s;
@@ -636,7 +651,7 @@
             html, body { height: 100%; overflow: hidden; }
 
             .screen {
-                height: 100%;
+                height: 100dvh;
                 padding: 28px 52px;
                 justify-content: center;
             }
@@ -674,19 +689,18 @@
             .ai-card       { margin-bottom: 0; }
             .verdict-label { margin-bottom: 0; }
 
-            /* ─ FINAL: coluna única compacta ─ */
-            .final-wrap    { max-width: 560px; }
-            .final-header  { padding: 24px 28px 18px; }
-            .final-icon    { font-size: 52px; margin-bottom: 6px; }
-            .score-big     { font-size: 4rem; }
-            .final-body    { padding: 20px 24px; }
-            .final-msg     { margin-bottom: 14px; font-size: 0.88rem; }
-            .stats-grid    { gap: 10px; margin-bottom: 14px; }
-            .stat-box      { padding: 12px 14px; }
-            .stat-n        { font-size: 1.8rem; }
-            .conclusion-box { padding: 14px 18px; margin-bottom: 16px; }
-            .conclusion-box p { font-size: 0.84rem; }
-            .btn-restart   { padding: 12px 24px; font-size: 0.9rem; }
+            /* ─ FINAL: coluna única ─ */
+            #screen-final  { padding: 20px 52px; }
+            .final-wrap    { max-width: 440px; }
+            .final-header  { padding: 16px 22px 12px; }
+            .final-icon    { font-size: 36px; }
+            .score-big     { font-size: 3rem; }
+            .final-body    { padding: 14px 18px; }
+            .stats-grid    { gap: 8px; }
+            .stat-box      { padding: 8px 12px; }
+            .stat-n        { font-size: 1.5rem; }
+            .conclusion-box { padding: 10px 14px; }
+            .btn-restart   { padding: 10px 18px; }
 
             /* ─ Overlay ─ */
             #overlay { align-items: center; }
@@ -698,8 +712,8 @@
             .stat-chips { gap: 6px; }
             .stat-chip { font-size: 0.73rem; padding: 5px 10px; }
             .ov-card { padding: 22px 16px; }
-            .final-header { padding: 28px 16px 24px; }
-            .final-body { padding: 18px 16px; }
+            .final-header { padding: 10px 14px 8px; }
+            .final-body { padding: 10px 12px; }
         }
 
         /* ── Tablet landscape (640px–1023px) ── */
@@ -840,10 +854,10 @@
 
             <div class="conclusion-box">
                 <h3>💡 Conclusão do Julgamento</h3>
-                <p>A Inteligência Artificial é poderosa, mas <strong>não infalível</strong>. Ela erra em contagens simples, cai em armadilhas lógicas, inventa informações com total confiança e até afirma ter sentimentos que não possui. Usar IA com senso crítico é tão importante quanto usá-la. <strong>Você acabou de provar isso.</strong></p>
+                <p>A IA é poderosa, mas <strong>não infalível</strong>. Ela erra lógica simples, inventa respostas e afirma ter sentimentos. <strong>Senso crítico é essencial ao usá-la — e você acabou de provar isso!</strong></p>
             </div>
 
-            <button class="btn-restart" onclick="restartGame()">↺ Julgar Novamente</button>
+            <button class="btn-restart" onclick="goHome()">🏠 Voltar à Tela Inicial</button>
         </div>
     </div>
 </div>
@@ -1093,8 +1107,8 @@ function showFinal() {
     document.getElementById('stat-caught').textContent = caughtErrors;
 }
 
-function restartGame() {
-    startGame();
+function goHome() {
+    showScreen('screen-intro');
 }
 </script>
 </body>
